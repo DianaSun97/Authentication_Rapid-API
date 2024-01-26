@@ -11,7 +11,6 @@ var (
 	fPort = flag.Int("port", 8081, "port for server")
 )
 
-// main is the main function
 func main() {
 	http.HandleFunc("/", handlers.Home)
 	http.HandleFunc("/about", handlers.About)

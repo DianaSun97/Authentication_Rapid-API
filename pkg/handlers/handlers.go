@@ -2,8 +2,8 @@ package handlers
 
 import (
 	_ "fmt"
+	"github.com/DianaSun97/elluliin_booking/render"
 	_ "html/template"
-	"myapp/render"
 	"net/http"
 )
 
