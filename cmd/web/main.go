@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	fPort = flag.Int("port", 8080, "port for server")
+	fPort = flag.Int("port", 8081, "port for server")
 )
 
 // main is the main function
@@ -17,5 +17,8 @@ func main() {
 	http.HandleFunc("/about", handlers.About)
 
 	flag.Parse()
-	http.ListenAndServe(fmt.Sprintf(":%d", *fPort), nil)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", *fPort), nil); err != nil {
+		panic(err)
+	}
+
 }
