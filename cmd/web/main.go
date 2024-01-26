@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"myapp/pkg/handlers"
 	"net/http"
 )
 
@@ -12,8 +13,8 @@ var (
 
 // main is the main function
 func main() {
-	http.HandleFunc("/", Home)
-	http.HandleFunc("/about", About)
+	http.HandleFunc("/", handlers.Home)
+	http.HandleFunc("/about", handlers.About)
 
 	flag.Parse()
 	http.ListenAndServe(fmt.Sprintf(":%d", *fPort), nil)
