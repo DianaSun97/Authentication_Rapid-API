@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"myapp/pkg/handlers"
+	"github.com/DianaSun97/elluliin_booking/pkg/handlers"
 	"net/http"
 )
 
