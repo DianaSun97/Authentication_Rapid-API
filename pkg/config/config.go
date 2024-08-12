@@ -10,4 +10,5 @@ type AppConfig struct {
 	TemplateCache map[string]*template.Template
 	InfoLog       *log.Logger
 	ErrorLog      *log.Logger
+	UseCache      bool
 }
