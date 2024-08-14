@@ -2,20 +2,20 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/DianaSun97/elluliin_booking/pkg/config"
+	"github.com/DianaSun97/elluliin_booking/internal/config"
 	"net/http"
 	"runtime/debug"
 )
 
 var app *config.AppConfig
 
-// NewHelpers
+// NewHelpers sets up app config for helpers
 func NewHelpers(a *config.AppConfig) {
 	app = a
 }
 
 func ClientError(w http.ResponseWriter, status int) {
-	app.InfoLog.Println("Client Error:", status)
+	app.InfoLog.Println("Client error with status of", status)
 	http.Error(w, http.StatusText(status), status)
 }
 
