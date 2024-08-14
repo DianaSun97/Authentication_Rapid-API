@@ -1,12 +1,10 @@
 package main
 
 import (
-	"database/sql"
-	_ "database/sql"
-	_ "database/sql/driver"
 	"encoding/gob"
 	"fmt"
 	"github.com/DianaSun97/elluliin_booking/internal/config"
+	"github.com/DianaSun97/elluliin_booking/internal/driver"
 	"github.com/DianaSun97/elluliin_booking/internal/handlers"
 	"github.com/DianaSun97/elluliin_booking/internal/helpers"
 	"github.com/DianaSun97/elluliin_booking/internal/models"
@@ -46,23 +44,24 @@ func main() {
 	}
 }
 
-func run() (*sql.DB, error) {
-	// what am I going to put in the session
+func run() (*driver.DB, error) {
+	// Register your models in the session
 	gob.Register(models.Reservation{})
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.RoomRestriction{})
 
-	// change this to true when in production
+	// Set the application in development mode
 	app.InProduction = false
 
+	// Set up logging
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	app.InfoLog = infoLog
 
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	app.ErrorLog = errorLog
 
-	// set up the session
+	// Set up session
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
@@ -71,33 +70,27 @@ func run() (*sql.DB, error) {
 
 	app.Session = session
 
-	// connect to database
+	// Connect to the database
 	log.Println("Connecting to database...")
-	connStr := "host=localhost port=5432 dbname=bookings user=tcs password=your_password sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=tcs password=your_password sslmode=disable")
 	if err != nil {
 		log.Fatal("Cannot connect to database! Dying...")
 		return nil, err
 	}
 
-	// Test the database connection
-	err = db.Ping()
-	if err != nil {
-		log.Fatal("Cannot ping database! Dying...")
-		return nil, err
-	}
-
 	log.Println("Connected to database!")
 
+	// Create a template cache
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
-		log.Fatal("cannot create template cache")
+		log.Fatal("Cannot create template cache")
 		return nil, err
 	}
 
 	app.TemplateCache = tc
 	app.UseCache = false
 
+	// Set up the repository and handlers
 	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
 	render.NewRenderer(&app)
