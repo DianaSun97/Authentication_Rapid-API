@@ -19,7 +19,7 @@ func main() {
 	tc, err := render.CreateTemplateCache()
 	app.UseCache = false
 	if err != nil {
-		log.Fatalln("cannot create template cach")
+		log.Fatalln("cannot create template cache")
 	}
 
 	app.TemplateCache = tc
