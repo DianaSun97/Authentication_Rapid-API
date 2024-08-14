@@ -1,4 +1,4 @@
-The new frontend/backend code for Elluliin
+# Elluliin
 ## <big>Key Functionality</big>
 
 1. Have a back end that the owner logs in to
