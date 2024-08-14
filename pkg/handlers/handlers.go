@@ -2,80 +2,52 @@ package handlers
 
 import (
 	"github.com/DianaSun97/elluliin_booking/pkg/config"
-	"github.com/DianaSun97/elluliin_booking/pkg/forms"
-	"github.com/DianaSun97/elluliin_booking/pkg/helpers"
+	_ "github.com/DianaSun97/elluliin_booking/pkg/forms"
+	_ "github.com/DianaSun97/elluliin_booking/pkg/helpers"
 	"github.com/DianaSun97/elluliin_booking/pkg/models"
 	"github.com/DianaSun97/elluliin_booking/render"
 	"net/http"
 )
 
-// Repo
+// Repo the repository used by the handlers
 var Repo *Repository
 
-// Repository
+// Repository is the repository type
 type Repository struct {
 	App *config.AppConfig
 }
 
-// NewRepo
-func NewRepository(a *config.AppConfig) *Repository {
+// NewRepo creates a new repository
+func NewRepo(a *config.AppConfig) *Repository {
 	return &Repository{
 		App: a,
 	}
 }
 
-// NewHandlers
+// NewHandlers sets the repository for the handlers
 func NewHandlers(r *Repository) {
 	Repo = r
 }
 
 // Home is the handler for the home page
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home-page.gohtml", &models.TemplateData{})
+	remoteIP := r.RemoteAddr
+	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
+
+	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 
 // About is the handler for the about page
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "about-page.gohtml", &models.TemplateData{})
-}
+	// perform some logic
+	stringMap := make(map[string]string)
+	stringMap["test"] = "Hello, again"
 
-// Generals
-func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "generals-page.gohtml", &models.TemplateData{})
-}
+	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
+	stringMap["remote_ip"] = remoteIP
 
-// Majors
-func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "majors-page.gohtml", &models.TemplateData{})
-}
-
-// Reservation is the handler for the reservation page
-func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	var emptyReservation models.Reservation
-	data := make(map[string]interface{})
-	data["reservation"] = emptyReservation
-
-	render.RenderTemplate(w, "make-reservation.page.gohtml", &models.TemplateData{
-		Form: nil,
-		Data: data,
+	// send data to the template
+	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
 	})
-}
-
-// CreateReservation handles the reservation creation
-func (m *Repository) CreateReservation(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	reservation := models.Reservation{
-		FirstName: r.Form.Get("first_name"),
-		LastName:  r.Form.Get("last_name"),
-		Email:     r.Form.Get("email"),
-		Phone:     r.Form.Get("phone"),
-	}
-
-	form := forms.New(r.PostForm)
-
 }

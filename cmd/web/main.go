@@ -1,34 +1,57 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/DianaSun97/elluliin_booking/pkg/config"
+	"github.com/DianaSun97/elluliin_booking/pkg/handlers"
 	"github.com/DianaSun97/elluliin_booking/render"
+	"github.com/alexedwards/scs/v2"
 	"log"
 	"net/http"
+	"time"
 )
 
-var (
-	fPort = flag.Int("port", 8081, "port for server")
-)
+const portNumber = ":8080"
 
+var app config.AppConfig
+var session *scs.SessionManager
+
+// main is the main function
 func main() {
-	var app config.AppConfig
+	// change this to true when in production
+	app.InProduction = false
+
+	// set up the session
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = app.InProduction
+
+	app.Session = session
 
 	tc, err := render.CreateTemplateCache()
-	app.UseCache = false
 	if err != nil {
-		log.Fatalln("cannot create template cache")
+		log.Fatal("cannot create template cache")
 	}
 
 	app.TemplateCache = tc
-	//http.HandleFunc("/", handlers.Home)
-	//http.HandleFunc("/about", handlers.About)
+	app.UseCache = false
 
-	flag.Parse()
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", *fPort), nil); err != nil {
-		panic(err)
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+
+	render.NewTemplates(&app)
+
+	fmt.Println(fmt.Sprintf("Staring application on port %s", portNumber))
+
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: routes(&app),
 	}
 
+	err = srv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
